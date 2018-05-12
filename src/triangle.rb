@@ -4,14 +4,27 @@ class Triangle
   class InequalityError < StandardError; end
 
   def initialize(sides)
-    @sides = sides
+    @sides = Sides.new(sides)
+
+  rescue
+    raise NullSideError
+
   end
 
   def type
-    raise ArgumentsError if less_three_sides?
-    raise NullSideError if any_null_side?
-    raise InequalityError if validate_sides?
+    validate!
 
+    calculate_type
+  end
+
+  private
+
+  def validate!
+    raise ArgumentsError if other_than_three_sides?
+    raise InequalityError if inequal_sides?
+  end
+
+  def calculate_type
     if different_sides == 1
       :equilateral
     elsif different_sides == 2
@@ -21,28 +34,60 @@ class Triangle
     end
   end
 
-  private
-
   def different_sides
-    @sides.uniq.count
+    @sides.unique_count
   end
 
-  def less_three_sides?
-    @sides.count != 3
+  def other_than_three_sides?
+    @sides.other_than_three?
   end
 
   def any_null_side?
-    @sides.any?{|n| n <= 0}
+    @sides.any_null?
   end
 
-  def validate_sides?
-    perimeter = 0
-    @sides.each do |side|
-      perimeter += side
+  def inequal_sides?
+    @sides.inequal?
+  end
+
+  def perimeter
+    @sides.sum
+  end
+
+  class Sides
+    class NullSideError < StandardError; end
+
+    def initialize(sides)
+      @sides = sides
+
+      raise NullSideError if any_null?
     end
-    @sides.each do |side|
-      return true if perimeter - side <= side
+
+    def inequal?
+      @sides.each do |side|
+        return true if sum - side <= side
+      end
+      false
     end
-    false
+
+    def unique_count
+      @sides.uniq.count
+    end
+
+    def other_than_three?
+      @sides.count != 3
+    end
+
+    def any_null?
+      @sides.any?{|n| n <= 0}
+    end
+
+    def sum
+      total = 0
+      @sides.each do |side|
+        total += side
+      end
+      total
+    end
   end
 end
