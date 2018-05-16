@@ -7,23 +7,22 @@ class Sides
     raise NullSideError if any_null?
   end
 
-  def inequal?
-    @sides.each do |side|
-      return true if sum - side <= side
-    end
-    false
-  end
-
   def unique_count
     @sides.uniq.count
   end
 
-  def other_than_three?
-    @sides.count != 3
+  def how_many
+    @sides.count
   end
 
   def any_null?
     @sides.any?{|n| n <= 0}
+  end
+
+  def combinations_two
+    yield @sides[0], @sides[1]
+    yield @sides[1], @sides[2]
+    yield @sides[2], @sides[0]
   end
 
   def sum
